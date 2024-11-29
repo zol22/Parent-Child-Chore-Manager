@@ -1,22 +1,46 @@
-import './App.css'
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-//import Login from "./pages/Login";
-//import ParentDashboard from "./components/Dashboard/ParentDashboard";
-//import ChildDashboard from "./components/Dashboard/ChildDashboard";
+import ParentDashboard from "./components/Dashboard/ParentDashboard";
+import ChildDashboard from "./components/Dashboard/ChildDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home";
 
-
-
-function App() {
+const App = () => {
+  const user = useSelector((state) => state.user);
 
   return (
-      <Routes>
-        {/*<Route path="/" element={<Login />} />*/}
-        <Route path="/signup" element={<Signup />} />
-        {/*<Route path="/parent-dashboard" element={<ParentDashboard />} />
-        <Route path="/child-dashboard" element={<ChildDashboard />} />*/}
-      </Routes>
-  )
-}
+    <Routes>
+      {/* Landing/Home page */}
+      <Route path="/" element={user ? <Navigate to={user.role === "Parent" ? "/parent-dashboard" : "/child-dashboard"} /> : <Home />} />
+      
+      {/* Authentication Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-export default App
+      {/* Protected Routes */}
+      <Route
+        path="/parent-dashboard"
+        element={
+          <ProtectedRoute role="Parent">
+            <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/child-dashboard"
+        element={
+          <ProtectedRoute role="Child">
+            <ChildDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all route */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+};
+
+export default App;

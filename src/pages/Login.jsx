@@ -1,30 +1,29 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupUser } from "../services/authService";
+import { loginUser } from "../services/authService";
 import { useDispatch } from "react-redux"; // Import useDispatch for Redux
 
-const Signup = () => {
+
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Parent");
-  const [familyId, setFamilyId] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
 
-  const handleSignup = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const userDoc = await signupUser(email, password, role, role === "Child" ? familyId : null);
+      const userDoc = await loginUser(email, password, dispatch);
 
-      // Dispatch user data to Redux
-      dispatch(setUser(userDoc));
+      // After successful login, dispatch user data to Redux
+     // dispatch(setUser(userDoc));
 
-      // Navigate to the appropriate dashboard based on the role
-      if (role === "Parent") {
+      // Redirect based on role
+      if (userDoc.role === "Parent") {
         navigate("/parent-dashboard");
       } else {
         navigate("/child-dashboard");
@@ -34,14 +33,13 @@ const Signup = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">Sign Up</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <form onSubmit={handleSignup} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
             value={email}
@@ -58,25 +56,11 @@ const Signup = () => {
             required
             className="w-full p-2 border rounded-lg"
           />
-          <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full p-2 border rounded-lg">
-            <option value="Parent">Parent</option>
-            <option value="Child">Child</option>
-          </select>
-          {role === "Child" && (
-            <input
-              type="text"
-              value={familyId}
-              onChange={(e) => setFamilyId(e.target.value)}
-              placeholder="Family ID"
-              required
-              className="w-full p-2 border rounded-lg"
-            />
-          )}
-          <button type="submit" className="w-full bg-green-500 text-white py-2 rounded-lg">Sign Up</button>
+          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg">Login</button>
         </form>
       </div>
     </div>
   );
 };
 
-export default Signup;
+export default Login;
