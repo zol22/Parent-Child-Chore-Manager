@@ -2,11 +2,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // Initial state for tasks
-const initialState = [
-  // Example tasks that would be stored in the Redux state
-  { id: 1, title: "Clean Kitchen", assignedTo: "Child 1", completed: false },
-  { id: 2, title: "Take out Trash", assignedTo: "Child 1", completed: false },
-];
+const initialState = {
+  tasks: [], // Initialize as an empty array
+};
 
 // Create tasks slice
 const tasksSlice = createSlice({
@@ -15,28 +13,58 @@ const tasksSlice = createSlice({
   reducers: {
     // Action to set the tasks (this can be useful for loading tasks initially)
     setTasks: (state, action) => {
-      return action.payload;
+      console.log('Payload received in setTasks:', action.payload);
+      console.log('Current state before setTasks:', JSON.stringify(state.tasks));
+      
+      // Safely replace the tasks array
+      if (Array.isArray(action.payload)) {
+        state.tasks = action.payload;
+        console.log('Updated tasks:', JSON.stringify(state.tasks));
+      } else {
+        console.error('Payload for setTasks is not an array:', action.payload);
+      }
+
     },
     // Action to assign a task to a child
     assignTask: (state, action) => {
       const { taskId, childName } = action.payload;
-      const task = state.find((task) => task.id === taskId);
+      const task = state.tasks.find((task) => task.id === taskId);
       if (task) {
         task.assignedTo = childName;
       }
     },
     // Action to mark a task as completed
     completeTask: (state, action) => {
-      const task = state.find((task) => task.id === action.payload);
+      const task = state.tasks.find((task) => task.id === action.payload);
       if (task) {
         task.completed = true;
+        task.status = 'Completed';
+        task.points = 10; // For simplicity, we award 10 points
       }
+    },
+    moveTask: (state, action) => {
+      const { taskId, status } = action.payload;
+      const task = state.tasks.find((task) => task.id === taskId);
+      if (task) {
+        task.status = status;
+      }
+    },
+    addTask: (state, action) => {
+        state.tasks.push(action.payload); // Add the task to the tasks array
+        console.log('Tasks after adding:', JSON.stringify(state.tasks));
+
     },
   },
 });
 
+// On app initialization, check version and clear outdated state
+const persistedState = JSON.parse(localStorage.getItem('persist:root'));
+if (persistedState && persistedState.version !== initialState.version) {
+  localStorage.clear();
+}
+
 // Export the actions
-export const { setTasks, assignTask, completeTask } = tasksSlice.actions;
+export const { setTasks, assignTask, completeTask, moveTask, addTask } = tasksSlice.actions;
 
 // Export the reducer
 export default tasksSlice.reducer;

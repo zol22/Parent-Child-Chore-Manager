@@ -10,6 +10,20 @@ import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist
 const persistConfig = {
   key: 'root', // Root level key
   storage, // Use local storage to persist
+  version: 1,
+  migrate: async (state) => {
+    // If state is undefined, reset to initial state (or clear it)
+    if (!state || !state._persist) {
+      return undefined; // Clear persisted state
+    }
+
+    // Check if the version matches
+    if (state._persist.version !== persistConfig.version) {
+      return undefined; // Clear persisted state for version mismatch
+    }
+
+    return state; // If version matches, return the state
+  },
 };
 
 // Combine reducers
