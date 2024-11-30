@@ -1,14 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = null;
+
 const userSlice = createSlice({
   name: "user",
-  initialState: null, // Default state is null, no user logged in initially
+  initialState,
   reducers: {
-    setUser: (state, action) => action.payload,// Updates state with user data
-    clearUser: () => null,// Clears user data (for logging out)
+    setUser: (state, action) => {
+      // Ensure the action payload is valid
+      if (!action.payload) {
+        throw new Error("Invalid user data.");
+      }
+      return action.payload; // Update the state with the new user data
+    },
+    clearUser: () => null, // Clear user on logout
   },
 });
 
 export const { setUser, clearUser } = userSlice.actions;
-
 export default userSlice.reducer;

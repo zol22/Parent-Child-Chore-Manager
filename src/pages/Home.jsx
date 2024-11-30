@@ -7,8 +7,14 @@ const Home = () => {
 
   const user = useSelector((state) => state.user);
 
+  // Redirect logged-in users to their respective dashboard
   if (user) {
-    return <div>Loading...</div>; // Can show a loading screen if redirecting
+    if (user.role === "Parent") {
+      return <Navigate to="/parent-dashboard" />;
+    }
+    if (user.role === "Child") {
+      return <Navigate to="/child-dashboard" />;
+    }
   }
 
   return (

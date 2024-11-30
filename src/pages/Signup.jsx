@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signupUser } from "../services/authService";
+import { signupUser, loginUser } from "../services/authService";
 import { useDispatch } from "react-redux"; // Import useDispatch for Redux
 
 
@@ -20,15 +20,34 @@ const Signup = () => {
   const dispatch = useDispatch();
 
 
+   // Validate Family ID for "Child" role
+   const validateFamilyId = (familyId) => {
+    // Check if Family ID is empty or not valid
+    if (!familyId || familyId.trim() === "") {
+      return "Family ID is required for Child role";
+    }
+    // If the Family ID is valid 
+    return null;
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
 
+    // If the role is "Child", validate Family ID
+    if (role === "Child") {
+      const familyIdError = validateFamilyId(familyId);
+      if (familyIdError) {
+        setError(familyIdError); // Show error message if Family ID is invalid
+        return;
+      }
+    }
+
     try {
       const userDoc = await signupUser(email, password, role, role === "Child" ? familyId : null);
 
-      // Dispatch user data to Redux
-      dispatch(setUser(userDoc));
+      // Immediately log the user in after signup to authenticate the session
+      const loggedInUser = await loginUser(email, password, dispatch);
 
       // Navigate to the appropriate dashboard based on the role
       if (role === "Parent") {
@@ -37,7 +56,16 @@ const Signup = () => {
         navigate("/child-dashboard");
       }
     } catch (err) {
-      setError(err.message);
+      console.error("Signup error: ", err);  // Log error for debugging
+       if (err.message.includes("email-already-in-use")) {
+        setError("Email is already in use. Please try with a different email.");
+      } else if (err.message.includes("weak-password")) {
+        setError("Password is too weak. Please choose a stronger password.");
+      } else if (err.message.includes("auth/wrong-password")) {
+        setError("The provided password is incorrect.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   };
 

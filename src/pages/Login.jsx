@@ -16,15 +16,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // React-Redux hook
-
+  const dispatch = useDispatch(); // Reference to the Redux store's dispatch function within your component.
 
   const handleLogin = async (e) => {
     e.preventDefault();  // Prevent form from reloading the page
     setError("");  // Clear any previous errors
 
     try {
-      const userDoc = await loginUser(email, password, dispatch);
+      const userDoc = await loginUser(email, password, dispatch); // loginUser function can use dispatch to send actions to the Redux store if the login is successful.
 
       // Redirect based on role
       if (userDoc.role === "Parent") {
@@ -37,7 +36,11 @@ const Login = () => {
           setError("No user found with this email.");
         } else if (err.code === "auth/wrong-password") {
           setError("Incorrect password.");
-        } else {
+        } 
+          else if (err.code === "auth/invalid-credential"){
+            setError("Invalid Credentials. Try again")
+        }
+        else {
           setError(err.message); // Generic error message
         }
     }

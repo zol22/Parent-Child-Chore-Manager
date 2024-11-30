@@ -28,34 +28,42 @@ export const useAuthStateChanged = () => {
 // Sign-Up User
 export const signupUser = async (email, password, role, familyId = null) => {
 
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const userId = userCredential.user.uid;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
 
-  // Default familyId to userId if Parent role
-  const userDoc = {
-    email,
-    role,
-    familyId: familyId || userId,
-    userId,
-  };
+    // Default familyId to userId if Parent role
+    const userDoc = {
+      email,
+      role,
+      familyId: familyId || userId,
+      userId,
+    };
 
-  // Add user data to Firestore
-  await setDoc(doc(db, "users", userId), userDoc);
+    // Add user data to Firestore
+    await setDoc(doc(db, "users", userId), userDoc);
 
-/* 
-  While you can dispatch immediately after signup, it's generally a better practice to fetch 
-  the user's data from Firestore after the login process and then dispatch that data to Redux. 
-  This ensures you have all the data from Firestore before updating the Redux store, which helps 
-  maintain data consistency and avoids issues with incomplete or missing data.
-*/
- // dispatch(setUser(userDoc));
+  /* 
+    While you can dispatch immediately after signup, it's generally a better practice to fetch 
+    the user's data from Firestore after the login process and then dispatch that data to Redux. 
+    This ensures you have all the data from Firestore before updating the Redux store, which helps 
+    maintain data consistency and avoids issues with incomplete or missing data.
+  */
+  // dispatch(setUser(userDoc));
 
-  // Return userDoc to use in components
-  return userDoc;
+    // Return userDoc to use in components
+    return userDoc;
+    
+} catch (error) {
+  console.error("Error in signupUser: ", error);
+  throw error;  // Throw the error to be caught in the component
+}
 };
 
 // Login User
 export const loginUser = async (email, password, dispatch) => {
+  
+  try {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
   // Fetch user metadata from Firestore
@@ -73,4 +81,9 @@ export const loginUser = async (email, password, dispatch) => {
   dispatch(setUser(userData));
 
   return userData;
+
+} catch(error) {
+  console.error("Error in loginUser: ", error);
+    throw error;  // Throw the error to be caught in the component
+}
 };
