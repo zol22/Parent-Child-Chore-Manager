@@ -1,6 +1,6 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { setUser, clearUser } from '../redux/userSlice'
+import { setUser, logout } from '../redux/userSlice'
 import { useDispatch } from 'react-redux';
 import { auth, db } from "./firebase";
 
@@ -20,7 +20,7 @@ export const useAuthStateChanged = () => {
       }
     } else {
       // No user is logged in, clear user data from Redux
-      dispatch(clearUser());
+      dispatch(logout());
     }
   });
 };

@@ -13,9 +13,9 @@ const userSlice = createSlice({
       }
       return action.payload; // Update the state with the new user data
     },
-    clearUser: () => null, // Clear user on logout
+    logout: () => null, // Clear user on logout
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, logout } = userSlice.actions;
 export default userSlice.reducer;
