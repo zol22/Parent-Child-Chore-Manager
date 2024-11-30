@@ -3,24 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { useDispatch } from "react-redux"; // Import useDispatch for Redux
 
+/* 
+  Login:
+  The user logs in with their credentials.
+  Firebase checks the credentials and gives the user.uid.
+  The app then fetches the user’s full data from Firestore using the user.uid.
+  The user’s data is dispatched to Redux using setUser.
+*/
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); // React-Redux hook
 
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault();  // Prevent form from reloading the page
+    setError("");  // Clear any previous errors
 
     try {
       const userDoc = await loginUser(email, password, dispatch);
-
-      // After successful login, dispatch user data to Redux
-     // dispatch(setUser(userDoc));
 
       // Redirect based on role
       if (userDoc.role === "Parent") {
@@ -29,7 +33,13 @@ const Login = () => {
         navigate("/child-dashboard");
       }
     } catch (err) {
-      setError(err.message);
+        if (err.code === "auth/user-not-found") {
+          setError("No user found with this email.");
+        } else if (err.code === "auth/wrong-password") {
+          setError("Incorrect password.");
+        } else {
+          setError(err.message); // Generic error message
+        }
     }
   };
 

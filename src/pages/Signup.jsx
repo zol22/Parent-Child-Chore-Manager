@@ -3,6 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { signupUser } from "../services/authService";
 import { useDispatch } from "react-redux"; // Import useDispatch for Redux
 
+
+/* 
+  Signup: The user creates an account.
+  The user’s data is saved to Firestore.
+  The user is redirected to the login page.
+*/
+
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
