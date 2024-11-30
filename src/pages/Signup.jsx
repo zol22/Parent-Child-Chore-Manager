@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { signupUser, loginUser } from "../services/authService";
 import { useDispatch } from "react-redux"; // Import useDispatch for Redux
 
@@ -109,6 +109,17 @@ const Signup = () => {
           )}
           <button type="submit" className="w-full bg-green-500 text-white py-2 rounded-lg">Sign Up</button>
         </form>
+
+        {/* Link to Login Page if the user already has an account */}
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-500 hover:underline">
+              Sign In
+            </Link>
+          </p>
+        </div>
+
       </div>
     </div>
   );
