@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // Default local storage for web
 import { combineReducers } from 'redux';
 import userReducer from './userSlice'; // Adjust this path to your user slice
+import tasksReducer from './tasksSlice'; // New tasksSlice to manage tasks
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 
 // Persist configuration
@@ -14,6 +15,8 @@ const persistConfig = {
 // Combine reducers
 const rootReducer = combineReducers({
   user: userReducer, // Add more reducers if needed
+  tasks: tasksReducer, // Adding tasks slice here
+
 });
 
 // Apply persistReducer
