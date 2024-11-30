@@ -57,11 +57,7 @@ const tasksSlice = createSlice({
   },
 });
 
-// On app initialization, check version and clear outdated state
-const persistedState = JSON.parse(localStorage.getItem('persist:root'));
-if (persistedState && persistedState.version !== initialState.version) {
-  localStorage.clear();
-}
+
 
 // Export the actions
 export const { setTasks, assignTask, completeTask, moveTask, addTask } = tasksSlice.actions;
