@@ -5,9 +5,9 @@ const ProtectedRoute = ({ role, children }) => {
 
   const user = useSelector((state) => state.user);
 
-  // If user is not logged in, redirect to login page
+  // If user is not logged in, redirect to home
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/" />;
   }
 
    // Redirect to appropriate dashboard if user has the wrong role
