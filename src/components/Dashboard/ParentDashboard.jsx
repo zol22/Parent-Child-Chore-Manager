@@ -12,9 +12,9 @@ const ParentDashboard = () => {
 
   useEffect(() => {
     const initialTasks = [
-      { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", completed: false, points: 0 },
-      { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", completed: false, points: 0 },
-      { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", completed: true, points: 0 },
+      { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 0 },
+      { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", points: 0 },
+      { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", points: 0 },
     ];
     dispatch(setTasks(initialTasks));
   }, [dispatch]);
@@ -52,21 +52,14 @@ const ParentDashboard = () => {
 
     const isCompletedColumn = destination.droppableId === "Completed";
 
-    // Dispatch moveTask with the new status (destination.droppableId is the column's id)
-    if (destination.droppableId === "Completed" && draggedTask.status !== "Completed") {
-      // Mark as complete if dropped in the "Completed" column
-      dispatch(completeTask(draggedTask.id));
-    } else {
       // Update task's status for other columns
       dispatch(
         moveTask({
           taskId: draggedTask.id,
           status: destination.droppableId,
-          completed: isCompletedColumn, // Set completed status based on destination
-
         })
       );
-    }
+    
     console.log("after moving the card...", tasks)
   };
 
@@ -125,9 +118,8 @@ const ParentDashboard = () => {
                             className="p-4 bg-gray-200 border rounded-lg shadow-md"
                           >
                             <h3 className="font-bold">{task.title}</h3>
-                            <p>Status: {task.completed ? "Completed" : "Incomplete"}</p>
                             <p>Assigned to: {task.assignedTo || "Unassigned"}</p>
-                            {!task.completed && (
+                            {status !== "Completed" && (
                               <button
                                 onClick={() => handleCompleteTask(task.id)}
                                 className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg"
