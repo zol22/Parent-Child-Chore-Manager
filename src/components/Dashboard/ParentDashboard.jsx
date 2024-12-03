@@ -35,7 +35,7 @@ const ParentDashboard = () => {
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
-    console.log(result)
+    console.log("This is result of onDragEnd ", result)
     if (!destination) return; // Dropped outside any column
 
     // Skip if dropped in the same position
@@ -50,18 +50,30 @@ const ParentDashboard = () => {
       return;
     }
 
+    const isCompletedColumn = destination.droppableId === "Completed";
+
     // Dispatch moveTask with the new status (destination.droppableId is the column's id)
-    dispatch(
-      moveTask({
-        taskId: draggedTask.id,
-        status: destination.droppableId,
-      })
-    );
+    if (destination.droppableId === "Completed" && draggedTask.status !== "Completed") {
+      // Mark as complete if dropped in the "Completed" column
+      dispatch(completeTask(draggedTask.id));
+    } else {
+      // Update task's status for other columns
+      dispatch(
+        moveTask({
+          taskId: draggedTask.id,
+          status: destination.droppableId,
+          completed: isCompletedColumn, // Set completed status based on destination
+
+        })
+      );
+    }
     console.log("after moving the card...", tasks)
   };
 
   const handleCompleteTask = (taskId) => {
     dispatch(completeTask(taskId));
+    console.log("after moving the card to complete...", tasks)
+
   };
 
   const filterTasksByStatus = (status) => tasks.filter((task) => task.status === status);
@@ -95,7 +107,7 @@ const ParentDashboard = () => {
         <div className="flex mt-8 space-x-4">
           {["Unassigned", "In Progress", "Completed"].map((status) => (
             <Droppable key={status} droppableId={status}>
-              {(provided) => (
+              {(provided) => ( 
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}

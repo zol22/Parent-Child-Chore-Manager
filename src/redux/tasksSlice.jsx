@@ -41,10 +41,11 @@ const tasksSlice = createSlice({
       }
     },
     moveTask: (state, action) => {
-      const { taskId, status } = action.payload;
+      const { taskId, status, completed } = action.payload;
       const task = state.tasks.find((task) => task.id === taskId);
       if (task) {
         task.status = status;
+        task.completed = completed; // Dynamically set completed status
       }
     },
     addTask: (state, action) => {
