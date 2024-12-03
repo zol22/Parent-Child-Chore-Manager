@@ -13,13 +13,11 @@ const tasksSlice = createSlice({
   reducers: {
     // Action to set the tasks (this can be useful for loading tasks initially)
     setTasks: (state, action) => {
-      console.log('Payload received in setTasks:', action.payload);
       console.log('Current state before setTasks:', JSON.stringify(state.tasks));
       
       // Safely replace the tasks array
       if (Array.isArray(action.payload)) {
         state.tasks = action.payload;
-        console.log('Updated tasks:', JSON.stringify(state.tasks));
       } else {
         console.error('Payload for setTasks is not an array:', action.payload);
       }

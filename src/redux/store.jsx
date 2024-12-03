@@ -11,7 +11,7 @@ const persistConfig = {
   key: 'root', // Root level key
   storage, // Use local storage to persist
   version: 1,
-  migrate: async (state) => {
+  migrate: async (state) => { // Automates state versioning and clearing of outdated persisted data, 
     // If state is undefined, reset to initial state (or clear it)
     if (!state || !state._persist) {
       return undefined; // Clear persisted state
