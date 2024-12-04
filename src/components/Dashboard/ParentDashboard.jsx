@@ -139,26 +139,28 @@ const ParentDashboard = () => {
                           >
                             <h3 className="font-bold">{task.title}</h3>
                             <p>Assigned to: {task.assignedTo || "Unassigned"}</p>
-                            <select
-                              value={task.assignedTo}
-                              onChange={(e) => handleAssignTask(task.id, e.target.value)}
-                              className="mt-2 px-4 py-2 border rounded-lg"
-                            >
-                              <option value="">Unassigned</option>
-                              {children.map((child) => (
-                                <option key={child.id} value={child.name}>
-                                  {child.name}
-                                </option>
-                              ))}
-                            </select>
-                            {status !== "Completed" && (
-                              <button
-                                onClick={() => handleCompleteTask(task.id)}
-                                className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg"
+                             <div className="flex flex-col items-start">
+                              <select
+                                value={task.assignedTo}
+                                onChange={(e) => handleAssignTask(task.id, e.target.value)}
+                                className="mt-2 px-4 py-2 border rounded-lg"
                               >
-                                Mark as Complete
-                              </button>
-                            )}
+                                <option value="">Unassigned</option>
+                                {children.map((child) => (
+                                  <option key={child.id} value={child.name}>
+                                    {child.name}
+                                  </option>
+                                ))}
+                              </select>
+                              {status !== "Completed" && (
+                                <button
+                                  onClick={() => handleCompleteTask(task.id)}
+                                  className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg"
+                                >
+                                  Mark as Complete
+                                </button>
+                              )}
+                              </div>
                           </div>
                         )}
                       </Draggable>
