@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { setTasks, setChildren, addTask, assignTask, moveTask, completeTask } from "../../redux/tasksSlice";
 import LogoutButton from "../LogoutButton";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
+
 
 const ParentDashboard = () => {
   const user = useSelector((state) => state.user.user);
@@ -18,14 +20,14 @@ const ParentDashboard = () => {
     // Mock fetching tasks and children based on familyId
 
     const initialTasks = [
-      { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 0 },
-      { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", points: 0 },
-      { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", points: 0 },
+      { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 10 },
+      { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", points: 7 },
+      { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", points: 10 },
     ];
 
     const initialChildren = [
-      { id: "c1", name: "Child 1" },
-      { id: "c2", name: "Child 2" },
+      { id: "c1", name: "Child 1" , points: 0},
+      { id: "c2", name: "Child 2", points: 0 },
     ];
 
 
@@ -139,7 +141,7 @@ const ParentDashboard = () => {
                           >
                             <h3 className="font-bold">{task.title}</h3>
                             <p>Assigned to: {task.assignedTo || "Unassigned"}</p>
-                             <div className="flex flex-col items-start">
+                            <div className="flex flex-col items-start">
                               <select
                                 value={task.assignedTo}
                                 onChange={(e) => handleAssignTask(task.id, e.target.value)}
@@ -160,9 +162,21 @@ const ParentDashboard = () => {
                                   Mark as Complete
                                 </button>
                               )}
+                            </div>
+
+                            {/* Points / Rewards */}
+                            {task.status === "Completed" && (
+                              <div className="mt-2 text-green-500">
+                                <p>Points Awarded: {task.points}</p>
+                                <div className="flex items-center space-x-2">
+                                  <FaTrophy className="text-yellow-500" />
+                                  <p>Reward: {task.points >= 10 ? "Gold Star" : "Silver Star"}</p>
+                                </div>
                               </div>
+                            )}
                           </div>
                         )}
+
                       </Draggable>
                     ))}
                     {provided.placeholder}
@@ -173,6 +187,28 @@ const ParentDashboard = () => {
           ))}
         </div>
       </DragDropContext>
+
+       {/* Children's Rewards */}
+       <div className="mt-8">
+        <h3 className="text-xl font-bold">Children's Rewards</h3>
+        <div className="flex space-x-4">
+          {children.map((child) => (
+            <div key={child.id} className="bg-white shadow-md rounded-lg p-4">
+              <h4 className="font-bold">{child.name}</h4>
+              <p className="text-gray-500">Points: {child.points || 0}</p>
+              <div className="flex items-center space-x-2 mt-2">
+                {child.points >= 10 ? (
+                  <FaTrophy className="text-yellow-500" />
+                ) : (
+                  <FaStar className="text-gray-500" />
+                )}
+                <span>{child.points >= 10 ? "Gold Star" : "Silver Star"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
     </div>
   );
 };

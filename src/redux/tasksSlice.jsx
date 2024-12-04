@@ -43,6 +43,10 @@ const tasksSlice = createSlice({
       if (task) {
         task.status = 'Completed';
         task.points = 10; // For simplicity, we award 10 points
+        const child = state.children.find(child => child.name === task.assignedTo);
+        if (child) {
+          child.points = (child.points || 0) + task.points;
+        }
       }
     },
     moveTask: (state, action) => {
