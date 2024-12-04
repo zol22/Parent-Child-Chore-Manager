@@ -1,23 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setTasks, addTask, moveTask, completeTask } from "../../redux/tasksSlice";
+import { setTasks, setChildren, addTask, assignTask, moveTask, completeTask } from "../../redux/tasksSlice";
 import LogoutButton from "../LogoutButton";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ParentDashboard = () => {
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user);
+  const familyId = useSelector((state) => state.user.familyId); // Updated familyId selector
+
   const tasks = useSelector((state) => state.tasks.tasks);
+  const children = useSelector((state) => state.tasks.children);
+
   const dispatch = useDispatch();
   const [newTask, setNewTask] = useState("");
 
   useEffect(() => {
+    // Mock fetching tasks and children based on familyId
+
     const initialTasks = [
       { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 0 },
       { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", points: 0 },
       { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", points: 0 },
     ];
+
+    const initialChildren = [
+      { id: "c1", name: "Child 1" },
+      { id: "c2", name: "Child 2" },
+    ];
+
+
     dispatch(setTasks(initialTasks));
-  }, [dispatch]);
+    dispatch(setChildren(initialChildren));
+  }, [dispatch, familyId]);
 
   const handleAddTask = () => {
     if (!newTask) return;
@@ -35,7 +49,7 @@ const ParentDashboard = () => {
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
-    console.log("This is result of onDragEnd ", result)
+   //console.log("This is result of onDragEnd ", result)
     if (!destination) return; // Dropped outside any column
 
     // Skip if dropped in the same position
@@ -50,8 +64,6 @@ const ParentDashboard = () => {
       return;
     }
 
-    const isCompletedColumn = destination.droppableId === "Completed";
-
       // Update task's status for other columns
       dispatch(
         moveTask({
@@ -61,6 +73,14 @@ const ParentDashboard = () => {
       );
     
     console.log("after moving the card...", tasks)
+  };
+
+  const handleAssignTask = (taskId, childName) => {
+    console.log("Assigning task", taskId, "to", childName);
+
+      dispatch(assignTask({ taskId, assignedTo: childName }));
+      console.log(tasks)
+
   };
 
   const handleCompleteTask = (taskId) => {
@@ -73,8 +93,8 @@ const ParentDashboard = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gray-100">
-      <h1 className="text-2xl font-bold">Welcome, {user.email} (Parent)</h1>
-      <LogoutButton />
+      <h1 className="text-2xl font-bold">Welcome, {user.email} ({user.role})</h1>
+      <LogoutButton/>
 
       {/* Chore Creation */}
       <div className="mt-6 flex">
@@ -119,6 +139,18 @@ const ParentDashboard = () => {
                           >
                             <h3 className="font-bold">{task.title}</h3>
                             <p>Assigned to: {task.assignedTo || "Unassigned"}</p>
+                            <select
+                              value={task.assignedTo}
+                              onChange={(e) => handleAssignTask(task.id, e.target.value)}
+                              className="mt-2 px-4 py-2 border rounded-lg"
+                            >
+                              <option value="">Unassigned</option>
+                              {children.map((child) => (
+                                <option key={child.id} value={child.name}>
+                                  {child.name}
+                                </option>
+                              ))}
+                            </select>
                             {status !== "Completed" && (
                               <button
                                 onClick={() => handleCompleteTask(task.id)}

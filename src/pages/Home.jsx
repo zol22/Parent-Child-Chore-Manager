@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 const Home = () => {
 
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user);
 
   // Redirect logged-in users to their respective dashboard
   if (user) {

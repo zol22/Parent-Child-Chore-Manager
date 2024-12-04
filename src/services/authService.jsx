@@ -16,7 +16,8 @@ export const useAuthStateChanged = () => {
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
-        dispatch(setUser(userDoc.data())); // Dispatch user data to Redux
+        const userData = userDoc.data();
+        dispatch(setUser({ user: userData, familyId: userData.familyId })); // Dispatch user data to Redux
       }
     } else {
       // No user is logged in, clear user data from Redux
@@ -78,7 +79,7 @@ export const loginUser = async (email, password, dispatch) => {
   const userData = userDoc.data();
 
   // Dispatch user data to Redux after successful login
-  dispatch(setUser(userData));
+  dispatch(setUser({ user: userData, familyId: userData.familyId }));
 
   return userData;
 

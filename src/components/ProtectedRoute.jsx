@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ role, children }) => {
 
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user);
 
   // If user is not logged in, redirect to home
   if (!user) {

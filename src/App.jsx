@@ -1,5 +1,6 @@
 import './App.css'
 import { Routes, Route, Navigate} from "react-router-dom";
+import { useEffect} from "react";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home"
@@ -10,7 +11,12 @@ import { useSelector } from "react-redux"; // Import useSelector to check user s
 
 function App() {
 
-  const user = useSelector((state) => state.user); // Get the user from the Redux store
+  const user = useSelector((state) => state.user.user); // Get the user from the Redux store
+
+  useEffect(() => {
+    // Clear persisted state on app load (for debugging)
+    localStorage.removeItem('persist:root');
+  }, []);
 
 
   return (

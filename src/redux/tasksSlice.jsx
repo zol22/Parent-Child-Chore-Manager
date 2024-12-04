@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 // Initial state for tasks
 const initialState = {
   tasks: [], // Initialize as an empty array
+  children: [], // List of children fetched by familyId
 };
 
 // Create tasks slice
@@ -13,7 +14,7 @@ const tasksSlice = createSlice({
   reducers: {
     // Action to set the tasks (this can be useful for loading tasks initially)
     setTasks: (state, action) => {
-      console.log('Current state before setTasks:', JSON.stringify(state.tasks));
+     // console.log('Current state before setTasks:', JSON.stringify(state.tasks));
       
       // Safely replace the tasks array
       if (Array.isArray(action.payload)) {
@@ -23,13 +24,18 @@ const tasksSlice = createSlice({
       }
 
     },
+    setChildren: (state, action) => {
+      state.children = action.payload;
+    },
     // Action to assign a task to a child
     assignTask: (state, action) => {
-      const { taskId, childName } = action.payload;
+      const { taskId, assignedTo } = action.payload;
       const task = state.tasks.find((task) => task.id === taskId);
       if (task) {
-        task.assignedTo = childName;
+        task.assignedTo = assignedTo || "Unassigned"; // Safely mutating via Immer
       }
+      console.log("Reducer Input:", action.payload);
+      console.log("Updated Tasks:", JSON.stringify(state.tasks));
     },
     // Action to mark a task as completed
     completeTask: (state, action) => {
@@ -57,7 +63,7 @@ const tasksSlice = createSlice({
 
 
 // Export the actions
-export const { setTasks, assignTask, completeTask, moveTask, addTask } = tasksSlice.actions;
+export const { setTasks, setChildren, assignTask, completeTask, moveTask, addTask } = tasksSlice.actions;
 
 // Export the reducer
 export default tasksSlice.reducer;
