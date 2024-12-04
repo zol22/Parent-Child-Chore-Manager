@@ -61,6 +61,7 @@ const ParentDashboard = () => {
 
     // Find the task being dragged
     const draggedTask = tasks.find((task) => task.id === result.draggableId);
+
     if (!draggedTask) {
       console.error("Task not found!");
       return;
@@ -73,6 +74,11 @@ const ParentDashboard = () => {
           status: destination.droppableId,
         })
       );
+
+    // If the task is dragged into the "Completed" column
+    if (destination.droppableId === "Completed" && draggedTask.status !== "Completed") {
+      dispatch(completeTask(result.draggableId)); // Update task status to completed and award points
+    }
     
     console.log("after moving the card...", tasks)
   };
@@ -208,7 +214,7 @@ const ParentDashboard = () => {
           ))}
         </div>
       </div>
-      
+
     </div>
   );
 };
