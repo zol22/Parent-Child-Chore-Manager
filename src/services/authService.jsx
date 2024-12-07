@@ -38,9 +38,13 @@ export const signupUser = async (email, password, role, familyId = null) => {
       email,
       role,
       familyId: familyId || userId,
-      userId,
-      children: [], // Initialize children as an empty array
-    };
+      userId
+      };
+
+    // Only add children array if the role is 'parent'
+    if (role === "parent") {
+      userDoc.children = []; // Initialize children as an empty array only for parents
+    }
 
     // Add user data to Firestore
     await setDoc(doc(db, "users", userId), userDoc);
