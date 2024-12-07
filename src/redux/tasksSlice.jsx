@@ -26,6 +26,12 @@ const tasksSlice = createSlice({
     },
     setChildren: (state, action) => {
       state.children = action.payload;
+      console.log(JSON.stringify(state.children))
+    },
+    addChild: (state,action) => {
+      const newChild = action.payload; // Expecting a child object like { name: 'John', points: 0 }
+      state.children.push(newChild); // Append the new child to the existing children array
+      console.log('Children after adding:', JSON.stringify(state.children));
     },
     // Action to assign a task to a child
     assignTask: (state, action) => {
@@ -90,7 +96,7 @@ const tasksSlice = createSlice({
 
 
 // Export the actions
-export const { setTasks, setChildren, assignTask, completeTask,removePointsFromChild, updateTaskStatus, moveTask, addTask } = tasksSlice.actions;
+export const { setTasks, setChildren, addChild, assignTask, completeTask,removePointsFromChild, updateTaskStatus, moveTask, addTask } = tasksSlice.actions;
 
 // Export the reducer
 export default tasksSlice.reducer;

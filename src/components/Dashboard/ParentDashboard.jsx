@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setTasks, setChildren, addTask, assignTask, removePointsFromChild, updateTaskStatus, moveTask, completeTask } from "../../redux/tasksSlice";
+import { setTasks, setChildren, addChild, addTask, assignTask, removePointsFromChild, updateTaskStatus, moveTask, completeTask } from "../../redux/tasksSlice";
 import LogoutButton from "../LogoutButton";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
@@ -16,6 +16,8 @@ const ParentDashboard = () => {
   const dispatch = useDispatch();
   const [newTask, setNewTask] = useState("");
   const [newTaskPoints, setNewTaskPoints] = useState(0);
+  const [newChildName, setNewChildName] = useState("");
+
 
 
   useEffect(() => {
@@ -41,6 +43,20 @@ const ParentDashboard = () => {
     dispatch(setTasks(initialTasks));
     dispatch(setChildren(initialChildren));
   }, [dispatch, familyId]);
+
+  const handleAddChild = () => {
+    if (!newChildName.trim()) {
+      alert("Child name cannot be empty");
+      return;
+    }
+    const newChild = {
+      id: `c${Date.now()}`,
+      name: newChildName,
+      points: 0,
+    };
+    dispatch(addChild(newChild));
+    setNewChildName("");
+  };
 
   const handleAddTask = () => {
 
@@ -126,6 +142,23 @@ const ParentDashboard = () => {
     <div className="min-h-screen p-6 bg-gray-100">
       <h1 className="text-2xl font-bold">Welcome, {user.email} ({user.role})</h1>
       <LogoutButton/>
+
+    {/* Child Creation */}
+    <div className="mt-6 flex space-x-4">
+          <input
+            type="text"
+            value={newChildName}
+            onChange={(e) => setNewChildName(e.target.value)}
+            placeholder="New Child Name"
+            className="w-1/3 px-4 py-2 border rounded-lg"
+          />
+          <button
+            onClick={handleAddChild}
+            className="ml-4 px-6 py-2 bg-green-500 text-white rounded-lg"
+          >
+            Add Child
+          </button>
+      </div>
 
       {/* Chore Creation */}
       <div className="mt-6 flex space-x-4">
