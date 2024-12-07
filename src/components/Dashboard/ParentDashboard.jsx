@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setTasks, setChildren, addTask, assignTask, moveTask, completeTask } from "../../redux/tasksSlice";
+import { setTasks, setChildren, addTask, assignTask, removePointsFromChild, updateTaskStatus, moveTask, completeTask } from "../../redux/tasksSlice";
 import LogoutButton from "../LogoutButton";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
@@ -15,6 +15,8 @@ const ParentDashboard = () => {
 
   const dispatch = useDispatch();
   const [newTask, setNewTask] = useState("");
+  const [newTaskPoints, setNewTaskPoints] = useState(0);
+
 
   useEffect(() => {
     // Mock fetching tasks and children based on familyId
@@ -22,7 +24,12 @@ const ParentDashboard = () => {
     const initialTasks = [
       { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 10 },
       { id: "2", title: "Take out Trash", status: "In Progress", assignedTo: "Child 1", points: 7 },
-      { id: "3", title: "Wash Dishes", status: "Completed", assignedTo: "Child 2", points: 10 },
+      { id: "3", title: "Wash Dishes", status: "In Progress", assignedTo: "Child 2", points: 10 },
+      { id: "4", title: "Walk the Dog", status: "Unassigned", assignedTo: "", points: 8 },
+      { id: "5", title: "Cook Dinner", status: "In Progress", assignedTo: "Child 1", points: 8 },
+      { id: "6", title: "Cut Grass", status: "In Progress", assignedTo: "Child 2", points: 9 },
+      { id: "7", title: "Do Laundry", status: "Unassigned", assignedTo: "", points: 10 },
+
     ];
 
     const initialChildren = [
@@ -36,6 +43,12 @@ const ParentDashboard = () => {
   }, [dispatch, familyId]);
 
   const handleAddTask = () => {
+
+    if (!newTask || newTaskPoints <= 0) {
+      alert("Please provide a valid task name and positive points.");
+      return;
+    }
+
     if (!newTask) return;
     const task = {
       id: Date.now().toString(),
@@ -43,15 +56,19 @@ const ParentDashboard = () => {
       status: "Unassigned",
       assignedTo: "",
       completed: false,
-      points: 0,
+      points: newTaskPoints,
     };
     dispatch(addTask(task));
     setNewTask("");
+    setNewTaskPoints(0);
+
   };
 
   const handleDragEnd = (result) => {
+
     const { source, destination } = result;
-   //console.log("This is result of onDragEnd ", result)
+    console.log(" This is result", result)
+ 
     if (!destination) return; // Dropped outside any column
 
     // Skip if dropped in the same position
@@ -59,7 +76,7 @@ const ParentDashboard = () => {
       return;
     }
 
-    // Find the task being dragged
+    // Find the task being dragged, draggableid: Uniquely identifies the specific item being dragged
     const draggedTask = tasks.find((task) => task.id === result.draggableId);
 
     if (!draggedTask) {
@@ -67,27 +84,33 @@ const ParentDashboard = () => {
       return;
     }
 
-      // Update task's status for other columns
-      dispatch(
-        moveTask({
-          taskId: draggedTask.id,
-          status: destination.droppableId,
-        })
-      );
+    // Handle task moving back from "Completed"
+    if (destination.droppableId !== "Completed" && draggedTask.status === "Completed") {
+      // Deduct points if the task is moved out of "Completed" (back to Unassigned or In Progress)
+      dispatch(removePointsFromChild({ taskId: result.draggableId, assignedTo: draggedTask.assignedTo, destinationStatus: destination.droppableId }));
+      return;
+    }
 
-    // If the task is dragged into the "Completed" column
+    // If the task is dragged into the "Completed" column and it's not already completed
     if (destination.droppableId === "Completed" && draggedTask.status !== "Completed") {
       dispatch(completeTask(result.draggableId)); // Update task status to completed and award points
     }
-    
-    console.log("after moving the card...", tasks)
+    else {
+      // Update task's status for other columns
+      dispatch(
+        moveTask({
+        taskId: draggedTask.id,
+        status: destination.droppableId,
+        })
+      );
+    }   
   };
 
   const handleAssignTask = (taskId, childName) => {
-    console.log("Assigning task", taskId, "to", childName);
+   // console.log("Assigning task", taskId, "to", childName);
 
       dispatch(assignTask({ taskId, assignedTo: childName }));
-      console.log(tasks)
+     // console.log(tasks)
 
   };
 
@@ -105,13 +128,26 @@ const ParentDashboard = () => {
       <LogoutButton/>
 
       {/* Chore Creation */}
-      <div className="mt-6 flex">
+      <div className="mt-6 flex space-x-4">
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="New Chore"
-          className="flex-1 px-4 py-2 border rounded-lg"
+          className="w-1/3 px-4 py-2 border rounded-lg"
+        />
+        <input
+          type="number"
+          value={newTaskPoints || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Prevent leading zeroes and ensure non-negative values
+            if (value === "" || /^[1-9]\d*$/.test(value)) {
+              setNewTaskPoints(value);
+            }
+          } }
+          placeholder="Add task points"
+          className="w-1/4 px-4 py-2 border rounded-lg"
         />
         <button
           onClick={handleAddTask}
@@ -146,6 +182,7 @@ const ParentDashboard = () => {
                             className="p-4 bg-gray-200 border rounded-lg shadow-md"
                           >
                             <h3 className="font-bold">{task.title}</h3>
+                            <p className="text-sm text-blue-600">Points: {task.points}</p>
                             <p>Assigned to: {task.assignedTo || "Unassigned"}</p>
                             <div className="flex flex-col items-start">
                               <select
@@ -160,14 +197,17 @@ const ParentDashboard = () => {
                                   </option>
                                 ))}
                               </select>
-                              {status !== "Completed" && (
-                                <button
-                                  onClick={() => handleCompleteTask(task.id)}
-                                  className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg"
-                                >
-                                  Mark as Complete
-                                </button>
-                              )}
+
+                              {/* Only show Mark as Complete if task is In Progress or Assigned */}
+                              {status !== "Completed" && (task.status === "In Progress")  && (task.assignedTo !== "Unassigned") && (
+                              <button
+                                onClick={() => handleCompleteTask(task.id)}
+                                className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg"
+                              >
+                                Mark as Complete
+                              </button>
+                            )}
+
                             </div>
 
                             {/* Points / Rewards */}

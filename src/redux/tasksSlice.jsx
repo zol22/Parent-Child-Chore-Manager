@@ -34,19 +34,42 @@ const tasksSlice = createSlice({
       if (task) {
         task.assignedTo = assignedTo || "Unassigned"; // Safely mutating via Immer
       }
-      console.log("Reducer Input:", action.payload);
-      console.log("Updated Tasks:", JSON.stringify(state.tasks));
+     // console.log("Reducer Input:", action.payload);
+      //console.log("Updated Tasks:", JSON.stringify(state.tasks));
     },
     // Action to mark a task as completed
     completeTask: (state, action) => {
       const task = state.tasks.find((task) => task.id === action.payload);
       if (task) {
         task.status = 'Completed';
-        task.points = 10; // For simplicity, we award 10 points
+       // task.points = 10; // For simplicity, we award 10 points
         const child = state.children.find(child => child.name === task.assignedTo);
         if (child) {
           child.points = (child.points || 0) + task.points;
         }
+        console.log("Completed task: ", JSON.stringify(task))
+        console.log("Child points", child.points)
+      }
+    },
+    removePointsFromChild: (state, action) => {
+      const { taskId, assignedTo, destinationStatus} = action.payload;
+      const task = state.tasks.find((task) => task.id === taskId);
+      const child = state.children.find((child) => child.name === assignedTo);
+
+      if (task && child) {
+        task.status = destinationStatus; // Update the task status to the new destination
+        child.points = Math.max((child.points || 0) - task.points, 0); // Deduct points from child when task is moved back, Avoid negative points
+       // task.points = 0; // Reset the points for the task, as it's no longer completed
+
+      }
+      console.log("Removing the points from the task...", JSON.stringify(task))
+      console.log("Child Points: ",child.points)
+    },
+    updateTaskStatus: (state, action) => {
+      const { taskId, status } = action.payload;
+      const task = state.tasks.find((task) => task.id === taskId);
+      if (task) {
+        task.status = status; // Update task status
       }
     },
     moveTask: (state, action) => {
@@ -67,7 +90,7 @@ const tasksSlice = createSlice({
 
 
 // Export the actions
-export const { setTasks, setChildren, assignTask, completeTask, moveTask, addTask } = tasksSlice.actions;
+export const { setTasks, setChildren, assignTask, completeTask,removePointsFromChild, updateTaskStatus, moveTask, addTask } = tasksSlice.actions;
 
 // Export the reducer
 export default tasksSlice.reducer;
