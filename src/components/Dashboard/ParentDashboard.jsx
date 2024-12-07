@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setTasks, setChildren, addChild, addTask, assignTask, removePointsFromChild, updateTaskStatus, moveTask, completeTask } from "../../redux/tasksSlice";
+import { doc, getDoc, onSnapshot, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../../services/firebase";
 import LogoutButton from "../LogoutButton";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
@@ -19,9 +21,9 @@ const ParentDashboard = () => {
   const [newChildName, setNewChildName] = useState("");
 
 
+  /* Firestore as the source of truth, with Redux for session state caching */
 
   useEffect(() => {
-    // Mock fetching tasks and children based on familyId
 
     const initialTasks = [
       { id: "1", title: "Clean Kitchen", status: "Unassigned", assignedTo: "", points: 10 },
@@ -33,18 +35,21 @@ const ParentDashboard = () => {
       { id: "7", title: "Do Laundry", status: "Unassigned", assignedTo: "", points: 10 },
 
     ];
-
-    const initialChildren = [
-      { id: "c1", name: "Child 1" , points: 0},
-      { id: "c2", name: "Child 2", points: 0 },
-    ];
-
-
     dispatch(setTasks(initialTasks));
-    dispatch(setChildren(initialChildren));
-  }, [dispatch, familyId]);
 
-  const handleAddChild = () => {
+    const parentDocRef = doc(db, "users", user.userId);
+    // Use Firestore listeners to update Redux whenever the database changes:
+    const unsubscribe = onSnapshot(parentDocRef, (doc) => {
+    if (doc.exists()) {
+      const childrenData = doc.data().children || [];
+      dispatch(setChildren(childrenData));
+    }
+  });
+
+  return () => unsubscribe();
+  }, [dispatch, user.userId]);
+
+  const handleAddChild = async() => {
     if (!newChildName.trim()) {
       alert("Child name cannot be empty");
       return;
@@ -54,8 +59,23 @@ const ParentDashboard = () => {
       name: newChildName,
       points: 0,
     };
-    dispatch(addChild(newChild));
-    setNewChildName("");
+
+    try {
+      // Add child to Firestore
+      const parentDocRef = doc(db, "users", user.userId); // Use `user.userId` to target parent's Firestore doc
+      await updateDoc(parentDocRef, {
+        children: arrayUnion(newChild),
+
+      });
+  
+      // Update Redux state
+      dispatch(addChild(newChild));
+      setNewChildName("");
+    } catch (err) {
+      console.error("Error adding child to Firestore:", err);
+      alert("Failed to add child. Please try again.");
+    }
+
   };
 
   const handleAddTask = () => {

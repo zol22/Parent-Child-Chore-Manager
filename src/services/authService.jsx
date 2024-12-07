@@ -39,6 +39,7 @@ export const signupUser = async (email, password, role, familyId = null) => {
       role,
       familyId: familyId || userId,
       userId,
+      children: [], // Initialize children as an empty array
     };
 
     // Add user data to Firestore
