@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc, arrayUnion} from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, arrayUnion, query, collection, where, getDocs} from "firebase/firestore";
 import { setUser, logout } from '../redux/userSlice'
 import { useDispatch } from 'react-redux';
 import { auth, db } from "./firebase";
@@ -27,7 +27,7 @@ export const useAuthStateChanged = () => {
 };
 
 // Sign-Up User
-export const signupUser = async (email, password, role, familyId = null, displayName = "") => {
+export const signupUser = async (email, password, role, familyId, displayName = "") => {
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -37,7 +37,7 @@ export const signupUser = async (email, password, role, familyId = null, display
     const userDoc = {
       email,
       role,
-      familyId: familyId || userId,
+      familyId: familyId,
       userId,
       displayName,
       };
@@ -51,11 +51,17 @@ export const signupUser = async (email, password, role, familyId = null, display
 
     // If the user is a child, link them to their parent
     if (role === "Child" && familyId) {
-      const parentDocRef = doc(db, "users", familyId);
-      const parentDoc = await getDoc(parentDocRef);
-
-      if (parentDoc.exists() && parentDoc.data().role === "Parent") {
-        // Update the parent's `children` array to include this child with additional info
+      const q = query(
+        collection(db, "users"),
+        where("role", "==", "Parent"),
+        where("familyId", "==", familyId)
+      );
+    
+      const querySnapshot = await getDocs(q);
+    
+      if (!querySnapshot.empty) {
+        // A matching parent exists; update their children array
+        const parentDocRef = querySnapshot.docs[0].ref; // Get the first matching document
         await updateDoc(parentDocRef, {
           children: arrayUnion({
             id: userId,

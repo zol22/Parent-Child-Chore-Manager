@@ -21,31 +21,18 @@ const Signup = () => {
   const dispatch = useDispatch();
 
 
-   // Validate Family ID for "Child" role
-   const validateFamilyId = (familyId) => {
-    // Check if Family ID is empty or not valid
-    if (!familyId || familyId.trim() === "") {
-      return "Family ID is required for Child role";
-    }
-    // If the Family ID is valid 
-    return null;
-  };
-
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
 
-    // If the role is "Child", validate Family ID
-    if (role === "Child") {
-      const familyIdError = validateFamilyId(familyId);
-      if (familyIdError) {
-        setError(familyIdError); // Show error message if Family ID is invalid
-        return;
-      }
+    // Validate Family ID
+    if ((role === "Parent" || role === "Child") && (!familyId || familyId.trim() === "")) {
+      setError("Family ID is required.");
+      return;
     }
 
     try {
-      const userDoc = await signupUser(email, password, role, role === "Child" ? familyId : null, displayName);
+      const userDoc = await signupUser(email, password, role, familyId, displayName);
 
       // Immediately log the user in after signup to authenticate the session
       const loggedInUser = await loginUser(email, password, dispatch);
@@ -107,6 +94,22 @@ const Signup = () => {
             <option value="Parent">Parent</option>
             <option value="Child">Child</option>
           </select>
+          {role === "Parent" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Family ID (Create and share this with your child):
+              </label>
+              <input
+                type="text"
+                value={familyId}
+                onChange={(e) => setFamilyId(e.target.value)}
+                placeholder="Enter Family ID"
+                required
+                className="w-full p-2 border rounded-lg"
+              />
+            </div>
+          )}
+
           {role === "Child" && (
             <input
               type="text"
