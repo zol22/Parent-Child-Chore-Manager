@@ -160,7 +160,7 @@ const ParentDashboard = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gray-100">
-      <h1 className="text-2xl font-bold">Welcome, {user.email} ({user.role})</h1>
+      <h1 className="text-2xl font-bold">Welcome, {user.displayName} ({user.role})</h1>
       <LogoutButton/>
 
     {/* Child Creation */}

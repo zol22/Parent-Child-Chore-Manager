@@ -15,6 +15,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Parent");
   const [familyId, setFamilyId] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,7 +45,7 @@ const Signup = () => {
     }
 
     try {
-      const userDoc = await signupUser(email, password, role, role === "Child" ? familyId : null);
+      const userDoc = await signupUser(email, password, role, role === "Child" ? familyId : null, displayName);
 
       // Immediately log the user in after signup to authenticate the session
       const loggedInUser = await loginUser(email, password, dispatch);
@@ -77,6 +78,15 @@ const Signup = () => {
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <form onSubmit={handleSignup} className="space-y-4">
+            <input
+            type="text"
+            placeholder="Full Name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            required
+            className="w-full p-2 border rounded-lg"
+
+          />
           <input
             type="email"
             value={email}

@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, arrayUnion} from "firebase/firestore";
 import { setUser, logout } from '../redux/userSlice'
 import { useDispatch } from 'react-redux';
 import { auth, db } from "./firebase";
@@ -27,7 +27,7 @@ export const useAuthStateChanged = () => {
 };
 
 // Sign-Up User
-export const signupUser = async (email, password, role, familyId = null) => {
+export const signupUser = async (email, password, role, familyId = null, displayName = "") => {
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -38,16 +38,35 @@ export const signupUser = async (email, password, role, familyId = null) => {
       email,
       role,
       familyId: familyId || userId,
-      userId
+      userId,
+      displayName,
       };
 
-    // Only add children array if the role is 'parent'
-    if (role === "parent") {
-      userDoc.children = []; // Initialize children as an empty array only for parents
-    }
+      if (role === "Parent") {
+        userDoc.children = []
+      }
 
     // Add user data to Firestore
     await setDoc(doc(db, "users", userId), userDoc);
+
+    // If the user is a child, link them to their parent
+    if (role === "Child" && familyId) {
+      const parentDocRef = doc(db, "users", familyId);
+      const parentDoc = await getDoc(parentDocRef);
+
+      if (parentDoc.exists() && parentDoc.data().role === "Parent") {
+        // Update the parent's `children` array to include this child with additional info
+        await updateDoc(parentDocRef, {
+          children: arrayUnion({
+            id: userId,
+            name: displayName,
+            points: 0, // Initialize points for the child
+          }),
+        });
+      } else {
+        throw new Error("Parent with the specified familyId does not exist.");
+      }
+    }
 
   /* 
     While you can dispatch immediately after signup, it's generally a better practice to fetch 
