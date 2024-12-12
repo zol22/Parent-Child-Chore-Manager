@@ -42,12 +42,20 @@ const ParentDashboard = () => {
     const unsubscribe = onSnapshot(parentDocRef, (doc) => {
     if (doc.exists()) {
       const childrenData = doc.data().children || [];
-      dispatch(setChildren(childrenData));
+      const existingChildIds = children.map((child) => child.id);
+
+      const uniqueChildren = childrenData.filter(
+        (child) => !existingChildIds.includes(child.id)
+      );
+
+      if (uniqueChildren.length > 0) {
+        dispatch(setChildren([...children, ...uniqueChildren]));
+      }
     }
   });
 
   return () => unsubscribe();
-  }, [dispatch, user.userId]);
+  }, [children, dispatch, user.userId]);
 
   const handleAddChild = async() => {
     if (!newChildName.trim()) {
@@ -60,6 +68,9 @@ const ParentDashboard = () => {
       points: 0,
     };
 
+      // Optimistic UI update
+    dispatch(addChild(newChild));
+
     try {
       // Add child to Firestore
       const parentDocRef = doc(db, "users", user.userId); // Use `user.userId` to target parent's Firestore doc
@@ -67,13 +78,11 @@ const ParentDashboard = () => {
         children: arrayUnion(newChild),
 
       });
-  
-      // Update Redux state
-      dispatch(addChild(newChild));
-      setNewChildName("");
     } catch (err) {
       console.error("Error adding child to Firestore:", err);
       alert("Failed to add child. Please try again.");
+    } finally {
+      setNewChildName("")
     }
 
   };
