@@ -13,7 +13,7 @@ const ParentDashboard = () => {
   const familyId = useSelector((state) => state.user.familyId); // Updated familyId selector
 
   const tasks = useSelector((state) => state.tasks.tasks);
-  console.log("tasks from parentDashboard", JSON.stringify(tasks))
+  //console.log("tasks from parentDashboard", JSON.stringify(tasks))
   const children = useSelector((state) => state.tasks.children);
 
   const dispatch = useDispatch();
@@ -40,17 +40,6 @@ const ParentDashboard = () => {
     if (doc.exists()) {
       const data = doc.data();
       dispatch(setChildren(data.children || []));
-
-      /*const childrenData = doc.data().children || [];
-      const existingChildIds = children.map((child) => child.id);
-
-      const uniqueChildren = childrenData.filter(
-        (child) => !existingChildIds.includes(child.id)
-      );
-
-      if (uniqueChildren.length > 0) {
-        dispatch(setChildren([...children, ...uniqueChildren]));
-      }*/
     }
   });
 
@@ -131,8 +120,6 @@ const ParentDashboard = () => {
       completed: false,
       points: newTaskPoints,
     };
-
-    /* Web app not adding task , permission eroor */
     try {
       const taskDocRef = doc(collection(db, "tasks"));
       await setDoc(taskDocRef, task); // Firestore auto-generates the ID
@@ -170,14 +157,13 @@ const ParentDashboard = () => {
     if (destination.droppableId !== "Completed" && draggedTask.status === "Completed") {
       // Deduct points if the task is moved out of "Completed" (back to Unassigned or In Progress)
       dispatch(removePointsFromChild({ taskId: result.draggableId, assignedTo: draggedTask.assignedTo, destinationStatus: destination.droppableId }));
-      return;
     }
 
     // If the task is dragged into the "Completed" column and it's not already completed
     if (destination.droppableId === "Completed" && draggedTask.status !== "Completed") {
       dispatch(completeTask(draggedTask.id)); // Update task status to completed and award points
     }
-    else {
+   
       // Update task's status for other columns
       dispatch(
         moveTask({
@@ -185,17 +171,16 @@ const ParentDashboard = () => {
         status: destination.droppableId,
         })
       );
-    } 
+   
     
-    /*Need to update tasks collection to  firestore here */
+    /*  Update tasks collection status from firestore here */
     try {
       const tasksQuery = query(collection(db, "tasks"), where("familyId", "==", familyId));
       const querySnapshot = await getDocs(tasksQuery);  // Execute the query to get matching documents
 
-      const updatedTasks = tasks.map((task) =>
+     const updatedTasks = tasks.map((task) =>
         task.id === draggedTask.id ? { ...task, status: destination.droppableId } : task
-      );
-      //await updateDoc(tasksQuery, { tasks: updatedTasks });
+      )
 
       // Update the task status in Firestore
       querySnapshot.forEach(async (taskDoc) => {
@@ -214,17 +199,51 @@ const ParentDashboard = () => {
   }
   };
 
-  const handleAssignTask = (taskId, childName) => {
-   // console.log("Assigning task", taskId, "to", childName);
+  const handleAssignTask = async (taskId, childName) => {
 
       dispatch(assignTask({ taskId, assignedTo: childName }));
-     // console.log(tasks)
+
+      try {
+        const docRef = doc(db, "tasks", taskId);
+    
+        await updateDoc(docRef, {
+          assignedTo: childName
+        });
+    
+        console.log("Document updated successfully!");
+      } catch (error) {
+        console.error("Error updating document: ", error);
+      }
 
   };
 
-  const handleCompleteTask = (taskId) => {
+  const handleCompleteTask = async (taskId) => {
     dispatch(completeTask(taskId));
     console.log("after clicking mark as complete button...", tasks)
+
+    try {
+      const tasksQuery = query(collection(db, "tasks"), where("familyId", "==", familyId));
+      const querySnapshot = await getDocs(tasksQuery);  // Execute the query to get matching documents
+
+     const updatedTasks = tasks.map((task) =>
+        task.id === taskId? { ...task, status: "Completed" } : task
+      )
+
+      // Update the task status in Firestore
+      querySnapshot.forEach(async (taskDoc) => {
+      const taskRef = doc(db, "tasks", taskDoc.id); // Get the reference of the task document
+      // Find the updated task in the array and update it in Firestore
+      const updatedTask = updatedTasks.find((task) => task.id === taskDoc.id);
+      if (updatedTask) {
+        await updateDoc(taskRef, {
+          status: updatedTask.status // Update the status field
+        });
+        console.log(`Task ${taskDoc.id} updated to status: ${updatedTask.status}`);
+      }
+    });
+  } catch (err) {
+    console.error("Error updating task status in Firestore:", err);
+  }
 
   };
 
