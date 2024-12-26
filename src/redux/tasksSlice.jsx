@@ -33,6 +33,9 @@ const tasksSlice = createSlice({
       state.children.push(newChild); // Append the new child to the existing children array
       console.log('Children after adding:', JSON.stringify(state.children));
     },
+    removeChild: (state,action) => {
+      state.children = state.children.filter((child) => child.id !== action.payload)
+    },
     // Action to assign a task to a child
     assignTask: (state, action) => {
       const { taskId, assignedTo } = action.payload;
@@ -40,6 +43,7 @@ const tasksSlice = createSlice({
       if (task) {
         task.assignedTo = assignedTo || "Unassigned"; // Safely mutating via Immer
       }
+      console.log("State from assignTask reducer:" + JSON.stringify(state))
      // console.log("Reducer Input:", action.payload);
       //console.log("Updated Tasks:", JSON.stringify(state.tasks));
     },
@@ -53,8 +57,9 @@ const tasksSlice = createSlice({
         if (child) {
           child.points = (child.points || 0) + task.points;
         }
-        console.log("Completed task: ", JSON.stringify(task))
-        console.log("Child points", child.points)
+        console.log("State from completeTask reducer:" + JSON.stringify(state))
+        //console.log("Showing all tasks from Completedtask: ", JSON.stringify(state.tasks))
+        //console.log("Child points", child.points)
       }
     },
     removePointsFromChild: (state, action) => {
@@ -77,13 +82,18 @@ const tasksSlice = createSlice({
       if (task) {
         task.status = status; // Update task status
       }
+      console.log("State from updateTaskStatus reducer:" + JSON.stringify(state))
+
     },
     moveTask: (state, action) => {
       const { taskId, status} = action.payload;
       const task = state.tasks.find((task) => task.id === taskId);
       if (task) {
         task.status = status;
+      
       }
+      console.log("State from moveTask reducer:" + JSON.stringify(state))
+
     },
     addTask: (state, action) => {
         state.tasks.push(action.payload); // Add the task to the tasks array
@@ -96,7 +106,7 @@ const tasksSlice = createSlice({
 
 
 // Export the actions
-export const { setTasks, setChildren, addChild, assignTask, completeTask,removePointsFromChild, updateTaskStatus, moveTask, addTask } = tasksSlice.actions;
+export const { setTasks, setChildren, addChild,removeChild, assignTask, completeTask,removePointsFromChild, updateTaskStatus, moveTask, addTask } = tasksSlice.actions;
 
 // Export the reducer
 export default tasksSlice.reducer;
