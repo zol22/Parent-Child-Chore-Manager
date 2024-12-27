@@ -45,6 +45,10 @@ export const signupUser = async (email, password, role, familyId, displayName = 
       if (role === "Parent") {
         userDoc.children = []
       }
+      if (role == "Child")
+      {
+        userDoc.points = 0
+      }
 
     // Add user data to Firestore
     await setDoc(doc(db, "users", userId), userDoc);
