@@ -52,7 +52,6 @@ const ChildDashboard = () => {
   }, [dispatch, user.displayName, user.userId]);
 
 
-  /* Its adding a children array inside the child document*/
   const handleDragEnd = async (result) => {
     const { source, destination } = result;
   
