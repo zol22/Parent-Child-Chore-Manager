@@ -45,15 +45,6 @@ const Home = () => {
         </Link>
       </div>
 
-      {/* Illustration */}
-      <div className="mt-16">
-        <img
-          src="https://illustrations.popsy.co/white/cleaning.svg"
-          alt="Household chores illustration"
-          className="w-full max-w-lg mx-auto drop-shadow-lg"
-        />
-      </div>
-
       {/* Footer */}
       <footer className="mt-16 text-sm text-purple-200">
         Made with ❤️ by your Chore Manager team.
