@@ -133,8 +133,6 @@ const ParentDashboard = () => {
 
   };
 
-  /* Its acting weird the points, when clicking mark as completed, points are updated,
-  then when moving back from completed also is updated but when dragging it to completed, points are not updated*/
 
   const handleDragEnd =  async(result) => {
 
