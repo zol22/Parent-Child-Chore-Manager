@@ -1,8 +1,11 @@
-# React + Vite
+## Family Chore Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### What is it?
 
-Currently, two official plugins are available:
+The Family Chore Tracker is an interactive web application designed to streamline family task management. It allows parents to assign tasks, track progress, and reward children with points. The app fosters accountability, teamwork, and motivation among family members by gamifying household chores.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How this works? 
+
+Parents can create accounts, generate a unique Family ID, and invite children to join. The Parent Dashboard allows parents to create tasks, assign them to specific children, set deadlines, and reward points for completion. Children can log in via the Child Dashboard to view their assigned tasks, update progress, and track earned rewards. Tasks can be managed using a drag-and-drop interface, making it easy to update statuses (e.g., Assigned, In Progress, Completed)
+
+ 
